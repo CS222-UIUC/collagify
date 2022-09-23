@@ -17,6 +17,7 @@ requires "pixie >= 5.0.0 & < 6.0.0"
 
 from std/os import walkDirRec, splitFile
 from std/strformat import `&`
+from std/unicode import Rune, runeAt
 
 task test, "Runs tests":
   const verbosity: uint = 1
@@ -24,5 +25,5 @@ task test, "Runs tests":
   for path in walkDirRec("nim-tests"):
     let ext: string = splitFile(path).ext
     if ext == ".nim":
-      const executable: string = when defined(windows): "nimble.exe" else: "nimble"
-      exec &"{executable} {nimbleFlags} c --verbosity:{verbosity} -r \"{path}\""
+      const quotation: Rune = runeAt(when defined(windows): "\"" else: "'", 0)
+      exec &"nimble {nimbleFlags} c --verbosity:{verbosity} -r {quotation}{path}{quotation}"
