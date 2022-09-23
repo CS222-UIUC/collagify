@@ -13,5 +13,14 @@
     "@typescript-eslint/parser": "^5.38.0",
     "eslint": "^8.23.1",
     "eslint-plugin-react": "^7.31.8"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CS222-UIUC/collagify.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/CS222-UIUC/collagify/issues"
+  },
+  "homepage": "https://github.com/CS222-UIUC/collagify#readme"
 }
