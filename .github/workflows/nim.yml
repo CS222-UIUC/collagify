@@ -24,10 +24,7 @@ jobs:
   nim-lint:
     name: Lint Nim code
 
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, windows-latest, macos-12]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-22.04
 
     defaults:
       run:
@@ -38,4 +35,4 @@ jobs:
       - uses: reviewdog/action-nimlint@v1.5.1
         with:
           github_token: ${{ secrets.github_token }}
-          src: 'src/*.nim'
+          src: 'nim-src/*.nim'
