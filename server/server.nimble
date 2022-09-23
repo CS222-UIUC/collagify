@@ -15,4 +15,7 @@ requires "nim >= 1.6.6"
 
 
 task test, "Runs tests":
-  exec "nim c -r nim-tests/t*"
+  for path in walkDirRec("nim-tests"):
+    let (dir, name, ext) = splitFile(path)
+    if ext == ".nim":
+      exec &"nim c -r '{path}'"
