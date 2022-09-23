@@ -19,9 +19,9 @@ from std/os import walkDirRec, splitFile
 from std/strformat import `&`
 
 task test, "Runs tests":
-  const verbosity = 1
+  const verbosity = 2
   const nimbleFlags = "--verbose"
   for path in walkDirRec("nim-tests"):
     let (dir, name, ext) = splitFile(path)
     if ext == ".nim":
-      exec &"nimble {nimbleFlags} c --verbosity:{verbosity} -r '{dir}/{name}'"
+      exec &"nimble {nimbleFlags} c --verbosity:{verbosity} -r '{path}'"
