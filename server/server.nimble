@@ -20,10 +20,12 @@ from std/strformat import `&`
 from std/unicode import Rune, runeAt
 
 task test, "Runs tests":
-  const verbosity: uint = 1
-  const nimbleFlags: string = "--verbose"
+  const
+    verbosity: uint = 1
+    nimFlags: string = &"--verbosity:{verbosity} -r"
+    nimbleFlags: string = "--verbose"
   for path in walkDirRec("nim-tests"):
     let ext: string = splitFile(path).ext
     if ext == ".nim":
       const quotation: Rune = runeAt(when defined(windows): "\"" else: "'", 0)
-      exec &"nimble {nimbleFlags} c --verbosity:{verbosity} -r {quotation}{path}{quotation}"
+      exec &"nimble {nimbleFlags} c {nimFlags} {quotation}{path}{quotation}"
