@@ -12,3 +12,7 @@ binDir          = "bin"
 # Dependencies
 
 requires "nim >= 1.6.6"
+
+
+task test, "Runs tests":
+  exec "nim c -r nim-tests/t*"
