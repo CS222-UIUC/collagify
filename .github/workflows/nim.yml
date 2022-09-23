@@ -34,7 +34,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: reviewdog/action-nimlint@v1.5.1
+      - uses: reviewdog/action-nimlint@v1.7.0
         with:
           github_token: ${{ secrets.github_token }}
           src: 'nim-src/*.nim'
