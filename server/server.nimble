@@ -15,6 +15,8 @@ requires "nim >= 1.6.6"
 
 
 task test, "Runs tests":
+  from std/os import walkDirRec, splitFile
+  from std/strformat import `&`
   for path in walkDirRec("nim-tests"):
     let (dir, name, ext) = splitFile(path)
     if ext == ".nim":
