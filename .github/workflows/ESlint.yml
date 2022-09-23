@@ -24,6 +24,9 @@ jobs:
         with:
           node-version: 12
           
+      - name: Install Typescript
+        run: npm install -g typescript
+        
       - name: Install ESlint
         run: npm init -y & npm init @eslint/config
       
