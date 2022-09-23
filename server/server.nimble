@@ -12,7 +12,14 @@ binDir          = "bin"
 # Dependencies
 
 requires "nim >= 1.6.6"
+requires "pixie >= 5.0.0 & < 6.0.0"
 
+
+from std/os import walkDirRec, splitFile
+from std/strformat import `&`
 
 task test, "Runs tests":
-  exec "nim c -r nim-tests/t*"
+  for path in walkDirRec("nim-tests"):
+    let (dir, name, ext) = splitFile(path)
+    if ext == ".nim":
+      exec &"nimble c -r '{path}'"
