@@ -25,4 +25,4 @@ task test, "Runs tests":
     let ext: string = splitFile(path).ext
     if ext == ".nim":
       const executable: string = when defined(windows): "nimble.exe" else: "nimble"
-      exec &"{executable} {nimbleFlags} c --verbosity:{verbosity} -r '{path}'"
+      exec &"{executable} {nimbleFlags} c --verbosity:{verbosity} -r \"{path}\""
