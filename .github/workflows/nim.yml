@@ -26,7 +26,7 @@ jobs:
       - uses: iffy/install-nim@v4.1.3
         with:
           version: binary:1.6.6
-      - run: nimble install --depsOnly
+      - run: nimble install --depsOnly --accept
       - run: nimble test
 
   nim-lint:
