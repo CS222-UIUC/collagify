@@ -24,4 +24,4 @@ task test, "Runs tests":
   for path in walkDirRec("nim-tests"):
     let (dir, name, ext) = splitFile(path)
     if ext == ".nim":
-      exec &"nimble {nimbleFlags} c --verbosity:{verbosity} -r '{path}'"
+      exec &"nimble {nimbleFlags} c --verbosity:{verbosity} -r '{dir}/{name}'"
