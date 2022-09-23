@@ -20,7 +20,7 @@ from std/strformat import `&`
 
 task test, "Runs tests":
   const verbosity = 1
-  const nimbleFlags = ""
+  const nimbleFlags = "--verbose"
   for path in walkDirRec("nim-tests"):
     let (dir, name, ext) = splitFile(path)
     if ext == ".nim":
