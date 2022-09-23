@@ -25,7 +25,7 @@ jobs:
           node-version: 12
           
       - name: Install ESlint
-        run: npm init -y
+        run: npm init -y & npm init @eslint/config
       
       # ESLint and Prettier must be in `package.json`
       - name: Install Node.js dependencies
