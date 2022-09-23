@@ -5,7 +5,7 @@ author          = "Jason Yip"
 description     = "Backend for CS222 project"
 license         = "N/A"
 srcDir          = "nim-src"
-namedBin["main"] = "server"
+bin             = @["server"]
 
 
 # Dependencies
