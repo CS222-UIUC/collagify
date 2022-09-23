@@ -6,6 +6,7 @@ description     = "Backend for CS222 project"
 license         = "N/A"
 srcDir          = "nim-src"
 bin             = @["server"]
+binDir          = "bin"
 
 
 # Dependencies
