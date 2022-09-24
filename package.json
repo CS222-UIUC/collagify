@@ -2,25 +2,22 @@
   "name": "lint",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.38.0",
     "@typescript-eslint/parser": "^5.38.0",
-    "eslint": "^8.23.1",
-    "eslint-plugin-react": "^7.31.8"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/CS222-UIUC/collagify.git"
-  },
-  "keywords": [],
-  "bugs": {
-    "url": "https://github.com/CS222-UIUC/collagify/issues"
-  },
-  "homepage": "https://github.com/CS222-UIUC/collagify#readme"
+    "eslint": "^8.24.0",
+    "eslint-config-standard-with-typescript": "^23.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.3.0",
+    "eslint-plugin-promise": "^6.0.1",
+    "eslint-plugin-react": "^7.31.8",
+    "typescript": "^4.8.3"
+  }
 }
