@@ -1,3 +1,3 @@
-var length;
+va length;
 length = 6;
 
