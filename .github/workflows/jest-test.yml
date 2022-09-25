@@ -1,0 +1,22 @@
+name: jest-test
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  run-test:
+    name: Run test
+    runs-on: ubuntu-latest
+
+    steps:
+      # set up runner with environment
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: npm ci
+      # run jest tests 
+      - uses: npm test
