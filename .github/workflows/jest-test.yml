@@ -2,6 +2,9 @@ name: Node.js test
 
 on:
   push:
+    paths:
+      'server/**.ts'
+      '!server/node_modules/**'
   pull_request:
     branches:
       - main
