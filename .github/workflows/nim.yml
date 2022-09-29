@@ -19,15 +19,15 @@ jobs:
 
     defaults:
       run:
-        working-directory: server
+        working-directory: server/nim
 
     steps:
       - uses: actions/checkout@v3
       - uses: iffy/install-nim@v4.1.3
         with:
-          version: binary:1.6.6
+          version: binary:1.6.0
       - run: nimble install --depsOnly --accept
-      - run: nimble test
+      - run: nimble test --reject
 
   nim-lint:
     name: Lint Nim code
@@ -36,11 +36,11 @@ jobs:
 
     defaults:
       run:
-        working-directory: server
+        working-directory: server/nim
 
     steps:
       - uses: actions/checkout@v3
       - uses: reviewdog/action-nimlint@v1.7.0
         with:
           github_token: ${{ secrets.github_token }}
-          src: 'nim-src/*.nim'
+          src: 'src/*.nim'
