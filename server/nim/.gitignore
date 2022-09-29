@@ -3,4 +3,4 @@ nimblecache/
 htmldocs/
 
 bin/
-nim-tests-bin/
+tests-bin/
