@@ -1,7 +1,7 @@
 import { add } from "../demo"
 
-describe ("add test", () => {
-    test('adding 1 and 2 should return 3', () => {
-        expect(add(1, 2)).toBe(3);
+describe ("example test", () => {
+    test('adding 1 and 1 should return 2', () => {
+        expect(1 + 1).toBe(2);
     });
 });
