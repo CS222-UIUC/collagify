@@ -5,7 +5,7 @@ from std/os import `/`, parentDir
 import server/images
 
 
-from pixie import PixieError
+from pixie import Image, PixieError
 
 
 
@@ -14,39 +14,44 @@ const
   testsDir = info.fileName.parentDir()
   imageDir = testsDir / "images"
 
+let
+  validImage = readFile(imageDir / "red_pink.png")
+  tallImage = readFile(imageDir / "tall.png")
+  wideImage = readFile(imageDir / "wide.png")
+  invalidImage = readFile(imageDir / "invalid.png")
 
 suite "strictCollage":
 
-  test "non square":
-    expect ValueError:
-      discard strictCollage([])
-      discard strictCollage([@["a"]])
-      discard strictCollage([@["a", "b"]])
-      discard strictCollage([@["a", "b"], @["a"]])
-      discard strictCollage([@["a", "b"], @["a", "b", "c"]])
-
   let
-    validImage = readFile(imageDir / "red_pink.png")
-    tallImage = readFile(imageDir / "tall.png")
-    wideImage = readFile(imageDir / "wide.png")
-    invalidImage = readFile(imageDir / "invalid.png")
-
     validMatrix = [
                    @[validImage, validImage],
                    @[validImage, validImage],
                   ]
 
+    strictCollage = StrictCollage()
+
+  test "non square":
+    expect CollageError:
+      discard strictCollage.collagify([@[validImage]])
+      discard strictCollage.collagify([@[validImage, validImage]])
+      discard strictCollage.collagify([@[validImage, validImage], @[validImage]])
+      discard strictCollage.collagify([
+                         @[validImage, validImage],
+                         @[validImage, validImage, validImage]
+                        ])
+
+
   test "piece too tall":
     var tallMatrix = deepCopy(validMatrix)
     tallMatrix[0][0] = tallImage
-    expect ValueError: discard strictCollage(tallMatrix)
+    expect CollageError: discard strictCollage.collagify(tallMatrix)
 
   test "piece too wide":
     var wideMatrix = deepCopy(validMatrix)
     wideMatrix[0][0] = wideImage
-    expect ValueError: discard strictCollage(wideMatrix)
+    expect CollageError: discard strictCollage.collagify(wideMatrix)
 
   test "invalid piece":
     var invalidMatrix = deepCopy(validMatrix)
     invalidMatrix[0][0] = invalidImage
-    expect PixieError: discard strictCollage(invalidMatrix)
+    expect PixieError: discard strictCollage.collagify(invalidMatrix)
