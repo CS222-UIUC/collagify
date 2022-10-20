@@ -13,7 +13,7 @@ import vmath
 type
   Collage* {.inheritable.} = object
   StrictCollage* = object of Collage
-  TransformativeCollage* {.inheritable.} = object of Collage
+  TransformativeCollage* = object of Collage
   CropCollage* = object of TransformativeCollage
   ScaledCollage* = object of TransformativeCollage
   CropAndScaleCollage* = object of TransformativeCollage
