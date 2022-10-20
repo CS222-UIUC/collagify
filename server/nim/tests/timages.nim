@@ -11,7 +11,7 @@ from pixie import Image, PixieError
 
 template info: auto = instantiationInfo(fullPaths = true)
 const
-  testsDir = info.fileName.parentDir()
+  testsDir = info.filename.parentDir()
   imageDir = testsDir / "images"
 
 let
