@@ -2,6 +2,7 @@
 
 .next
 .DS_Store
+*.env
 *.env.local
 
 # dependencies
