@@ -13,10 +13,13 @@
     "@chakra-ui/react": "^2.3.4",
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
+    "@react-three/drei": "^9.37.0",
+    "@react-three/fiber": "^8.8.10",
     "framer-motion": "^7.3.6",
     "next": "latest",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "three": "^0.145.0"
   },
   "devDependencies": {
     "@types/node": "18.0.6",
