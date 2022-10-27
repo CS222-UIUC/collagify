@@ -30,16 +30,8 @@ suite "strictCollage":
 
     strictCollage = StrictCollage()
 
-  test "non square":
-    expect CollageError:
-      discard strictCollage.collagify([@[validImage]])
-      discard strictCollage.collagify([@[validImage, validImage]])
-      discard strictCollage.collagify([@[validImage, validImage], @[validImage]])
-      discard strictCollage.collagify([
-                         @[validImage, validImage],
-                         @[validImage, validImage, validImage]
-                        ])
-
+  test "just one":
+    expect CollageError: discard strictCollage.collagify([@[validImage]])
 
   test "piece too tall":
     var tallMatrix = deepCopy(validMatrix)
@@ -55,3 +47,32 @@ suite "strictCollage":
     var invalidMatrix = deepCopy(validMatrix)
     invalidMatrix[0][0] = invalidImage
     expect PixieError: discard strictCollage.collagify(invalidMatrix)
+
+  test "not rectangle":
+    expect CollageError:
+      discard strictCollage.collagify([@[validImage, validImage], @[validImage]])
+      discard strictCollage.collagify([
+                         @[validImage, validImage],
+                         @[validImage, validImage, validImage]
+                        ])
+
+  test "valid":
+    discard strictCollage.collagify([@[validImage, validImage]])
+    discard strictCollage.collagify([@[validImage, validImage], @[validImage, validImage]])
+
+
+suite "cropCollage":
+
+  let
+    validMatrix = [
+                   @[validImage, validImage],
+                   @[validImage, validImage],
+                  ]
+
+    cropCollage = CropCollage()
+
+
+  test "valid":
+    discard cropCollage.collagify([@[wideImage, wideImage]])
+    discard cropCollage.collagify([@[validImage, validImage], @[validImage, tallImage]])
+
