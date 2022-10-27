@@ -20,7 +20,7 @@ let
   wideImage = readFile(imageDir / "wide.png")
   invalidImage = readFile(imageDir / "invalid.png")
 
-suite "strictCollage":
+suite "rectCollage":
 
   let
     validMatrix = [
@@ -28,51 +28,46 @@ suite "strictCollage":
                    @[validImage, validImage],
                   ]
 
-    strictCollage = StrictCollage()
+    rectCollage = RectCollage()
 
   test "just one":
-    expect CollageError: discard strictCollage.collagify([@[validImage]])
+    expect CollageError: discard rectCollage.collagify([@[validImage]])
 
   test "piece too tall":
     var tallMatrix = deepCopy(validMatrix)
     tallMatrix[0][0] = tallImage
-    expect CollageError: discard strictCollage.collagify(tallMatrix)
+    expect CollageError: discard rectCollage.collagify(tallMatrix)
 
   test "piece too wide":
     var wideMatrix = deepCopy(validMatrix)
     wideMatrix[0][0] = wideImage
-    expect CollageError: discard strictCollage.collagify(wideMatrix)
+    expect CollageError: discard rectCollage.collagify(wideMatrix)
 
   test "invalid piece":
     var invalidMatrix = deepCopy(validMatrix)
     invalidMatrix[0][0] = invalidImage
-    expect PixieError: discard strictCollage.collagify(invalidMatrix)
+    expect PixieError: discard rectCollage.collagify(invalidMatrix)
 
   test "not rectangle":
     expect CollageError:
-      discard strictCollage.collagify([@[validImage, validImage], @[validImage]])
-      discard strictCollage.collagify([
+      discard rectCollage.collagify([@[validImage, validImage], @[validImage]])
+      discard rectCollage.collagify([
                          @[validImage, validImage],
                          @[validImage, validImage, validImage]
                         ])
 
   test "valid":
-    discard strictCollage.collagify([@[validImage, validImage]])
-    discard strictCollage.collagify([@[validImage, validImage], @[validImage, validImage]])
+    discard rectCollage.collagify([@[validImage, validImage]])
+    discard rectCollage.collagify([@[validImage, validImage], @[validImage, validImage]])
 
 
 suite "cropCollage":
 
   let
-    validMatrix = [
-                   @[validImage, validImage],
-                   @[validImage, validImage],
-                  ]
-
     cropCollage = CropCollage()
 
 
   test "valid":
     discard cropCollage.collagify([@[wideImage, wideImage]])
-    discard cropCollage.collagify([@[validImage, validImage], @[validImage, tallImage]])
+    discard cropCollage.collagify([@[wideImage, validImage], @[validImage, tallImage]])
 

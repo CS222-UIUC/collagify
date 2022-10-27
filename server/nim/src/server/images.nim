@@ -9,11 +9,10 @@ import vmath
 
 type
   Collage* {.inheritable.} = object
-  StrictCollage* {.final.} = object of Collage
-  TransformativeCollage* = object of Collage
-  CropCollage* = object of TransformativeCollage
-  ScaledCollage* = object of TransformativeCollage
-  CropAndScaleCollage* = object of TransformativeCollage
+  RectCollage* = object of Collage
+  CropCollage* = object of RectCollage
+  ScaledCollage* = object of RectCollage
+  CropAndScaleCollage* = object of RectCollage
 
   CollageError* = object of ValueError
 
@@ -23,7 +22,7 @@ type
 method fillCanvas*(collage: Collage; imageGrid: openArray[seq[Image]]): Image {.base.} =
   raise newException(CollageError, "Don't use an abstract base Collage class")
 
-method fillCanvas*(collage: StrictCollage; imageGrid: openArray[seq[Image]]): Image =
+method fillCanvas*(collage: RectCollage; imageGrid: openArray[seq[Image]]): Image =
 
   let rowLength = imageGrid[0].len
   if not allIt(imageGrid[1..^1], it.len == rowLength):
@@ -74,7 +73,7 @@ method fillCanvas*(collage: CropCollage; imageGrid: openArray[seq[Image]]): Imag
         for image in row:
           quickCrop(image, resultBounds)
 
-  return fillCanvas(StrictCollage(), croppedImageGrid)
+  return procCall fillCanvas(RectCollage(collage), croppedImageGrid)
 
 
 
