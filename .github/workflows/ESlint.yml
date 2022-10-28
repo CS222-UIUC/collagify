@@ -5,10 +5,11 @@ on:
   # but only for the main branch
   push:
     branches:
-      - workflow-test
-  pull_request:
-    branches:
       - main
+  pull_request:
+    paths:
+      - "./client/**"
+      - "./server/**"
 
 jobs:
   run-linters:
@@ -25,13 +26,12 @@ jobs:
           node-version: 18
 
       # ESLint and Prettier must be in `package.json`
-      - name: Install Node.js dependencies with Yarn
-        working-directory: ./client
-        run:
-          npm t
-        working-directory: ./server
-        run:
-          npm t
+      - name: Install Node.js dependencies with NPM
+        # working-directory: ./client
+        run: npm ci
+        # working-directory: ./server
+        # run:
+        #   npm ci
 
       - name: List files in the repository
         run: |
