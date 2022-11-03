@@ -32,10 +32,12 @@ export default function Home() {
             </a>
           </Link>
 
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+          <Link href="/editor">
+            <a className={styles.card}>
+              <h2>Editor &rarr;</h2>
+              <p>WIP editor page that lets you customize a collage</p>
+            </a>
+          </Link>
 
           <Link href="/3d-demo">
             <a className={styles.card}>
@@ -80,4 +82,8 @@ export default function Home() {
       </footer>
     </div>
   );
+}
+
+function page(props) {
+  return
 }
