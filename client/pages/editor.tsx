@@ -43,30 +43,36 @@ export function Editor({covers} : {covers : string[]}) {
       </div>
 
       <div className={styles.collageContainer}>
-        <div 
-          className={styles.collage}
-          style={{
-            aspectRatio: numCols / numRows,
-            gridTemplateColumns: `repeat(${numCols}, minmax(0, 1fr))`,
-            gridTemplateRows: `repeat(${numRows}, minmax(0, 1fr))`,
-          }}
-        >
-          {covers.map((cover) => (
-            <div className={styles.cover}>
-              <Image 
-                src={cover}
-                placeholder="blur"
-                blurDataURL="/missing-cover.jpg"
-                alt="An album cover"
-                fill
-              />
-            </div>
-          ))}
-        </div>
+        <Collage covers={covers} rows={numRows} cols={numCols}/>
       </div>
 
     </div>
-  )
+  );
+}
+
+export function Collage({covers, rows, cols}) {
+  return (
+    <div 
+      className={styles.collage}
+      style={{
+        aspectRatio: rows / cols,
+        gridTemplateColumns: `repeat(${rows}, minmax(0, 1fr))`,
+        gridTemplateRows: `repeat(${cols}, minmax(0, 1fr))`,
+      }}
+    >
+      {covers.map((cover) => (
+        <div className={styles.cover}>
+          <Image 
+            src={cover}
+            placeholder="blur"
+            blurDataURL="/missing-cover.jpg"
+            alt="An album cover"
+            fill
+          />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export async function getServerSideProps(context) {
