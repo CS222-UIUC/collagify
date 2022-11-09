@@ -38,8 +38,8 @@ export function Editor({covers}) {
       <div 
         className={styles.collage}
         style={{
-          gridTemplateColumns: "repeat(" + numCols + ", 1fr)",
-          gridTemplateRows: "repeat(" + numRows + ", 1fr)",
+          gridTemplateColumns: `repeat(${numCols}, 1fr)`,
+          gridTemplateRows: `repeat(${numRows}, 1fr)`,
         }}
       >
         {covers.map((cover) => (
