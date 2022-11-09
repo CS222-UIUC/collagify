@@ -4,35 +4,52 @@ import Image from "next/image";
 import Link from "next/link";
 
 import styles from "../styles/editor.module.css";
+import {
+  ChakraProvider,
+  Slider,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb,
+  SliderMark,
+  useSlider
+} from "@chakra-ui/react";
 
 export default function EditorPage(props) {
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Customize your collage</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <ChakraProvider>
+      <div className={styles.container}>
+        <Head>
+          <title>Customize your collage</title>
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
 
-      <header className={styles.navbar}>
-          <Link href="/">Home</Link>
-          <Link href="/about">About</Link>
-      </header>
+        <header className={styles.navbar}>
+            <Link href="/">Home</Link>
+            <Link href="/about">About</Link>
+        </header>
 
-      <main className={styles.main}>
-        <Editor {...props}/>
-      </main>
-    </div>
+        <main className={styles.main}>
+          <Editor {...props}/>
+        </main>
+      </div>
+    </ChakraProvider>
   );
 }
 
 export function Editor({covers} : {covers : string[]}) {
   
   // Make the collage approximately square initially
-  const default_rows = Math.floor(Math.sqrt(covers.length));
-  const default_cols = Math.ceil(covers.length / default_rows); 
+  let default_rows = Math.floor(Math.sqrt(covers.length));
+  let default_cols = Math.ceil(covers.length / default_rows); 
 
-  const [numCols, setNumCols] = useState(default_cols);
-  const [numRows, setNumRows] = useState(default_rows);
+  let [numCols, setNumCols] = useState(default_cols);
+  let [numRows, setNumRows] = useState(default_rows);
+
+  let changeCollageDimensions = (rows) => {
+    setNumRows(rows);
+    setNumCols(Math.ceil(covers.length / rows))
+  }
+  
 
   // Collage and controls are given fixed width and height relative to the viewport
   // The collage will try to fill its assigned space with square covers without overflowing it
@@ -40,6 +57,12 @@ export function Editor({covers} : {covers : string[]}) {
     <div className={styles.editor}>
 
       <div className={styles.controls}>
+      <Slider onChange={changeCollageDimensions} aria-label="aspect" defaultValue={3} min={1} max={covers.length} step={1}>
+        <SliderTrack>
+          <SliderFilledTrack />
+        </SliderTrack>
+        <SliderThumb />
+      </Slider>
       </div>
 
       <div className={styles.collageContainer}>
@@ -55,9 +78,9 @@ export function Collage({covers, rows, cols}) {
     <div 
       className={styles.collage}
       style={{
-        aspectRatio: rows / cols,
-        gridTemplateColumns: `repeat(${rows}, minmax(0, 1fr))`,
-        gridTemplateRows: `repeat(${cols}, minmax(0, 1fr))`,
+        aspectRatio: cols / rows,
+        gridTemplateColumns: `repeat(${cols}, 1fr)`,
+        gridTemplateRows: `repeat(${rows}, 1fr)`,
       }}
     >
       {covers.map((cover) => (
@@ -67,6 +90,7 @@ export function Collage({covers, rows, cols}) {
             placeholder="blur"
             blurDataURL="/missing-cover.jpg"
             alt="An album cover"
+            sizes="10em"
             fill
           />
         </div>

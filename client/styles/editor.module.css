@@ -31,8 +31,9 @@
 }
 
 .controls{
-  height: 10em;
+  height: 100%;
   width: 15%;
+  padding: 2%;
 }
 
 .collageContainer{
