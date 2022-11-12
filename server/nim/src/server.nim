@@ -3,12 +3,14 @@ import std/asyncdispatch
 import std/json
 import std/httpclient
 import std/sequtils
+import std/sugar
 import std/uri
 from std/strformat import `&`
 from std/strutils import split
-from std/sugar import collect
 
 import server/images
+
+from pixie import Image, PixieError
 
 
 proc onProgressChanged(total, progress, speed: BiggestInt) {.async.} =
@@ -23,9 +25,13 @@ proc main* {.async.} =
     server: AsyncHttpServer = newAsyncHttpServer()
     client: AsyncHttpClient = newAsyncHttpClient()
 
+  let collage = RectCollage()
+
   client.onProgressChanged = onProgressChanged
 
   proc generateCollage(req: Request) {.async.} =
+
+    stderr.write(&"{dumpToString(req)}\L")
 
     var matrix: seq[seq[Uri]]
     for row in req.url.query.split('&'):
@@ -45,28 +51,56 @@ proc main* {.async.} =
 
         matrix[^1].add(uri)
 
-    if matrix.len == 0:
-      await req.respond(Http400, &"Must have at least 1 row{httpNewLine}")
-      return
 
-    if matrix.anyIt(it.len == 0):
-      await req.respond(Http400, &"Cannot have empty rows{httpNewLine}")
-      return
+    var
+      futureResponses: seq[seq[Future[AsyncResponse]]]
+      futureBodies: seq[seq[Future[string]]]
 
-    if matrix.len == 1 and matrix[0].len == 1:
-      await req.respond(Http400, &"Must have at least 1 image{httpNewLine}")
-      return
 
-    echo pretty(%* matrix)
+    newSeq(futureResponses, matrix.len)
+    newSeq(futureBodies, matrix.len)
 
-    var contents: seq[seq[string]]
-    newSeq(contents, matrix.len)
     for i, row in matrix.pairs:
-      newSeq(contents[i], row.len)
+      newSeq(futureResponses[i], row.len)
+      newSeq(futureBodies[i], row.len)
+
+      for j, url in row.pairs:
+        futureResponses[i][j] = client.get(url)
+
+        capture i, j:
+          proc setUrl(resp: Future[AsyncResponse]) =
+            futureBodies[i][j] = newFuture[string]("setUrl");
+            if resp.failed():
+              futureBodies[i][j].fail(resp.readError())
+            elif not resp.read().code().is2xx():
+              futureBodies[i][j].fail(newException(ValueError, resp.read().status))
+            else:
+              futureBodies[i][j] = resp.read().body()
+
+          addCallback(futureResponses[i][j], setUrl)
+
+    var futureRows: seq[Future[seq[string]]]
+    newSeq(futureRows, futureBodies.len)
+    for i, row in futureBodies.pairs:
+      futureRows[i] = all(row)
+
+    let bodies: seq[seq[string]] = await all(futureRows)
 
 
+    var collageImage: string
+    try:
+      collageImage = collage.collagify(bodies)
+    except CollageError:
+      await req.respond(Http400, &"{getCurrentExceptionMsg()}\L")
+    except PixieError:
+      await req.respond(Http400, &"{getCurrentExceptionMsg()}\L")
 
-    await req.respond(Http200, "Bruh")
+    let headers = newHttpHeaders({"Content-Type" : "image/png"})
+
+    echo "HERE"
+    await req.respond(Http200, collageImage, headers)
+
+
   proc callback(req: Request) {.async.} =
 
     case req.reqMethod:

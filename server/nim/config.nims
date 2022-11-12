@@ -3,3 +3,4 @@ when defined(release):
 else:
   switch("debugger", "native")
 switch("styleCheck", "hint")
+switch("define", "ssl")
