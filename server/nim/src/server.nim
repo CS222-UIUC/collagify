@@ -1,8 +1,6 @@
 import std/asynchttpserver
 import std/asyncdispatch
-import std/json
 import std/httpclient
-import std/sequtils
 import std/sugar
 import std/uri
 from std/strformat import `&`
@@ -17,15 +15,12 @@ proc onProgressChanged(total, progress, speed: BiggestInt) {.async.} =
   echo(&"Downloaded {progress} of {total}")
   echo(&"Current rate: {float(speed):.3g} b/s")
 
-  discard 
 
 
 proc main* {.async.} =
   var
     server: AsyncHttpServer = newAsyncHttpServer()
     client: AsyncHttpClient = newAsyncHttpClient()
-
-  let collage = RectCollage()
 
   client.onProgressChanged = onProgressChanged
 
@@ -51,45 +46,45 @@ proc main* {.async.} =
 
         matrix[^1].add(uri)
 
+    dump matrix
 
     var
       futureResponses: seq[seq[Future[AsyncResponse]]]
-      futureBodies: seq[seq[Future[string]]]
-
 
     newSeq(futureResponses, matrix.len)
-    newSeq(futureBodies, matrix.len)
-
     for i, row in matrix.pairs:
       newSeq(futureResponses[i], row.len)
-      newSeq(futureBodies[i], row.len)
-
       for j, url in row.pairs:
         futureResponses[i][j] = client.get(url)
 
-        capture i, j:
-          proc setUrl(resp: Future[AsyncResponse]) =
-            futureBodies[i][j] = newFuture[string]("setUrl");
-            if resp.failed():
-              futureBodies[i][j].fail(resp.readError())
-            elif not resp.read().code().is2xx():
-              futureBodies[i][j].fail(newException(ValueError, resp.read().status))
-            else:
-              futureBodies[i][j] = resp.read().body()
+    for i, row in futureResponses.pairs:
+      for j, response in row.pairs:
+        discard await response
 
-          addCallback(futureResponses[i][j], setUrl)
+    for i, row in futureResponses.pairs:
+      for j, response in row.pairs:
+        if response.failed():
+          await req.respond(Http502, &"\"{matrix[i][j]}\": {response.readError().msg}")
+          return
+        if not response.read().code().is2xx():
+          await req.respond(Http502, &"\"{matrix[i][j]}\": {response.read().status}")
+          return
 
-    var futureRows: seq[Future[seq[string]]]
-    newSeq(futureRows, futureBodies.len)
-    for i, row in futureBodies.pairs:
-      futureRows[i] = all(row)
+    var bodies: seq[seq[string]]
 
-    let bodies: seq[seq[string]] = await all(futureRows)
+    newSeq(bodies, matrix.len)
+    for i, row in futureResponses.pairs:
+      newSeq(bodies[i], row.len)
+      for j, response in row.pairs:
+        bodies[i][j] = await response.read().body()
 
 
     var collageImage: string
     try:
-      collageImage = collage.collagify(bodies)
+      if req.url.path == "/crop":
+        collageImage = collagify(CropCollage(), bodies)
+      else:
+        collageImage = collagify(RectCollage(), bodies)
     except CollageError:
       await req.respond(Http400, &"{getCurrentExceptionMsg()}\L")
     except PixieError:
@@ -97,7 +92,6 @@ proc main* {.async.} =
 
     let headers = newHttpHeaders({"Content-Type" : "image/png"})
 
-    echo "HERE"
     await req.respond(Http200, collageImage, headers)
 
 
