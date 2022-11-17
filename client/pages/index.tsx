@@ -32,15 +32,19 @@ export default function Home() {
             </a>
           </Link>
 
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+          <Link href="/editor">
+            <a className={styles.card}>
+              <h2>Editor &rarr;</h2>
+              <p>WIP editor page that lets you customize a collage</p>
+            </a>
+          </Link>
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+          <Link href="/3d-demo">
+            <a className={styles.card}>
+              <h2>3D Demo &rarr;</h2>
+              <p>A demo page showcasing rendering 3d objects on a website</p>
+            </a>
+          </Link>
 
           <a
             href="https://github.com/vercel/next.js/tree/canary/examples"
@@ -78,4 +82,8 @@ export default function Home() {
       </footer>
     </div>
   );
+}
+
+function page(props) {
+  return
 }

@@ -1,4 +1,4 @@
-on: [push, pull_request]
+on: [push]
 
 name: Nim
 
@@ -6,11 +6,7 @@ jobs:
   nim-test:
     name: Run Nim tests using `nimble test`
 
-    strategy:
-      max-parallel: 3
-      matrix:
-        os: [ubuntu-22.04, windows-latest, macos-12]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-22.04
 
     continue-on-error: true
 
@@ -42,4 +38,4 @@ jobs:
       - uses: reviewdog/action-nimlint@v1.7.0
         with:
           github_token: ${{ secrets.github_token }}
-          src: 'src/*.nim'
+          src: '**/*.nim'

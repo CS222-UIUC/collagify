@@ -1,0 +1,42 @@
+.navbar {
+  background: linear-gradient(0, white, beige); 
+  width: 100%;
+  height: 5em;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.navbar > * {
+  font-size: 1.5em;
+  margin: 1em;
+  font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
+  Bitstream Vera Sans Mono, Courier New, monospace;
+}
+
+.main {
+  width: 100%;
+  height: auto;
+}
+
+.editor{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.controls{
+  height: 10em;
+  width: 15%;
+  background-color: red;
+}
+
+.collage {
+  width: 75%;
+  display: grid;
+}
+
+.collage > * {
+  aspect-ratio: 1;
+}

@@ -13,3 +13,4 @@ binDir          = "bin"
 
 requires "nim >= 1.6"
 requires "pixie >= 5 & < 6"
+requires "vmath >= 1.2 & < 1.3"
