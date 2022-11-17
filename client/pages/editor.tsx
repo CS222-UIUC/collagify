@@ -1,7 +1,6 @@
 import Head from "next/head";
-import {useState,} from 'react'
+import {useCallback, useRef, useState,} from 'react'
 import Image from "next/image";
-import Link from "next/link";
 import styles from "../styles/editor.module.css";
 import {
   Slider,
@@ -10,8 +9,9 @@ import {
   SliderThumb,
   SliderMark,
   useSlider,
-  Box
 } from "@chakra-ui/react";
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 export default function EditorPage(props) {
   return (
@@ -41,7 +41,7 @@ export function Editor({covers} : {covers : string[]}) {
   let [numCols, setNumCols] = useState(default_cols);
 
   // Covers can be arranged into n rows if covers % n 
-  let changeCollageDimensions = (index) => {
+  const changeCollageDimensions = (index) => {
     setNumRows(possible_rows[index]);
     setNumCols(findColFromRow(covers.length, possible_rows[index]))
   }
@@ -90,31 +90,62 @@ function findPossibleRows(num_covers: number) : number[] {
 }
 
 export function Collage({covers, rows, cols}) {
+
+  let [displayCovers, setDisplayCovers] = useState(covers);
+  const moveCover = (index_a, index_b) => {
+    let tmp = displayCovers[index_a];
+    displayCovers[index_a] = displayCovers[index_b];
+    displayCovers[index_b] = tmp;
+    // this trick makes react thinks we are changing displayCovers into a new object and rerender
+    setDisplayCovers([...displayCovers]); 
+  };
+
   return (
-    <div 
-      className={styles.collage}
-      style={{
-        aspectRatio: cols / rows,
-        gridTemplateColumns: `repeat(${cols}, 1fr)`,
-        gridTemplateRows: `repeat(${rows}, 1fr)`,
-      }}
-    >
-      {covers.map((cover) => (
-        <div className={styles.cover}>
-          {/*Box used to overlay hover border on top of cover image*/}
-          <div className={styles.coverOutline}/>
-          <Image 
-            src={cover}
-            placeholder="blur"
-            blurDataURL="/missing-cover.jpg"
-            alt="An album cover"
-            sizes="10em"
-            fill
-          />
-        </div>
-      ))}
-    </div>
+    <DndProvider backend={HTML5Backend}>
+      <div 
+        className={styles.collage}
+        style={{
+          aspectRatio: cols / rows,
+          gridTemplateColumns: `repeat(${cols}, 1fr)`,
+          gridTemplateRows: `repeat(${rows}, 1fr)`,
+        }}
+      >
+        {displayCovers.map((url, index) => (<Cover index={index} url={url} moveCover={moveCover}/>))}
+      </div>
+    </DndProvider>
   );
+}
+
+export function Cover({index, url, moveCover}) {
+  // useDrag - the list item is draggable
+  const [, dragRef] = useDrag({
+    type: 'cover',
+    item: { index },
+  })
+  // useDrop - the list item is also a drop area
+  const [, dropRef] = useDrop({
+      accept: 'cover',
+      drop: (item : {index: number}) => {
+        console.log("dropping");
+        moveCover(item.index, index);
+      }
+  })
+  const ref = useRef(null)
+  const dragDropRef = dragRef(dropRef(ref))
+  return (
+    <div className={styles.cover} ref={dragDropRef}>
+      {/*Box used to overlay hover border on top of cover image*/}
+      <div className={styles.coverOutline}/>
+      <Image 
+        src={url}
+        placeholder="blur"
+        blurDataURL="/missing-cover.jpg"
+        alt="An album cover"
+        sizes="10em"
+        fill
+      />
+    </div>
+  )
 }
 
 export async function getServerSideProps(context) {
