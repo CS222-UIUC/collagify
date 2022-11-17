@@ -15,6 +15,7 @@ export default function App({ Component, pageProps }: AppProps) {
       // makes chakra not override global.css' background color
       global: {
         body: {
+          color: "",
           bg: "",
         },
       }
