@@ -9,23 +9,25 @@ export default function App({ Component, pageProps }: AppProps) {
 
   const theme = extendTheme({
     colors: {
-      spotify: {
-        green: "#1DB954",
-        black: "#191414",
-        white: "#FFFFFF",
+      spotifyGreen: "#1DB954"
+    },
+    styles: {
+      // makes chakra not override global.css' background color
+      global: {
+        body: {
+          bg: "",
+        },
       }
-    }
+    },
   });
 
   return (
-    <ChakraProvider theme={theme}>
-      <Box bgColor="spotify.black">
-        <header className={styles.navbar}>
-            <Link href="/">Home</Link>
-            <Link href="/about">About</Link>
-        </header>
-        <Component {...pageProps} />
-      </Box>
+    <ChakraProvider theme={theme} resetCSS={false}>
+      <header className={styles.navbar}>
+          <Link href="/">Home</Link>
+          <Link href="/about">About</Link>
+      </header>
+      <Component {...pageProps} />
     </ChakraProvider>
   );
 }
