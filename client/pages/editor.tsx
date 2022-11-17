@@ -2,75 +2,91 @@ import Head from "next/head";
 import {useState,} from 'react'
 import Image from "next/image";
 import Link from "next/link";
-
 import styles from "../styles/editor.module.css";
 import {
-  ChakraProvider,
   Slider,
   SliderTrack,
   SliderFilledTrack,
   SliderThumb,
   SliderMark,
-  useSlider
+  useSlider,
+  Box
 } from "@chakra-ui/react";
 
 export default function EditorPage(props) {
   return (
-    <ChakraProvider>
-      <div className={styles.container}>
-        <Head>
-          <title>Customize your collage</title>
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
-
-        <header className={styles.navbar}>
-            <Link href="/">Home</Link>
-            <Link href="/about">About</Link>
-        </header>
-
-        <main className={styles.main}>
-          <Editor {...props}/>
-        </main>
-      </div>
-    </ChakraProvider>
+    <>
+    <Head>
+      <title>Customize your Collage</title>
+      <link rel="icon" href="/favicon.ico" />
+    </Head>
+    <Editor {...props}/>
+    </>
   );
 }
 
 export function Editor({covers} : {covers : string[]}) {
   
+  // TODO: return error page if covers is empty
+  const kMaxCovers = 100;
+  covers = covers.slice(0, kMaxCovers);
+
+  let possible_rows = findPossibleRows(covers.length);
   // Make the collage approximately square initially
-  let default_rows = Math.floor(Math.sqrt(covers.length));
-  let default_cols = Math.ceil(covers.length / default_rows); 
+  let default_index = Math.floor(possible_rows.length / 2);
+  let default_rows = possible_rows[default_index];
+  let default_cols = findColFromRow(covers.length, default_rows);
 
-  let [numCols, setNumCols] = useState(default_cols);
   let [numRows, setNumRows] = useState(default_rows);
+  let [numCols, setNumCols] = useState(default_cols);
 
-  let changeCollageDimensions = (rows) => {
-    setNumRows(rows);
-    setNumCols(Math.ceil(covers.length / rows))
+  // Covers can be arranged into n rows if covers % n 
+  let changeCollageDimensions = (index) => {
+    setNumRows(possible_rows[index]);
+    setNumCols(findColFromRow(covers.length, possible_rows[index]))
   }
   
-
   // Collage and controls are given fixed width and height relative to the viewport
   // The collage will try to fill its assigned space with square covers without overflowing it
   return (
-    <div className={styles.editor}>
-
-      <div className={styles.controls}>
-      <Slider onChange={changeCollageDimensions} aria-label="aspect" defaultValue={3} min={1} max={covers.length} step={1}>
-        <SliderTrack>
-          <SliderFilledTrack />
-        </SliderTrack>
-        <SliderThumb />
-      </Slider>
+    <main className={styles.editor}>
+      <div className={styles.controlsContainer}>
+        <Slider 
+          onChange={changeCollageDimensions} 
+          aria-label="aspect" 
+          defaultValue={default_index} 
+          min={1} 
+          max={possible_rows.length - 1} 
+        >
+          <SliderTrack>
+            <SliderFilledTrack />
+          </SliderTrack>
+          <SliderThumb />
+        </Slider>
       </div>
 
       <div className={styles.collageContainer}>
         <Collage covers={covers} rows={numRows} cols={numCols}/>
       </div>
 
-    </div>
+    </main>
   );
+}
+
+function findColFromRow(num_covers: number, num_rows: number) : number {
+  return Math.ceil(num_covers / num_rows);
+}
+
+function findPossibleRows(num_covers: number) : number[] {
+  let to_return : number[] = [];
+  for (let num_rows = 1; num_rows <= num_covers; num_rows++) {
+    let num_cols = findColFromRow(num_covers, num_rows);
+    // There must not be empty rows
+    if (num_covers > num_cols * (num_rows - 1)) {
+      to_return.push(num_rows);
+    }
+  }
+  return to_return;
 }
 
 export function Collage({covers, rows, cols}) {
@@ -85,6 +101,8 @@ export function Collage({covers, rows, cols}) {
     >
       {covers.map((cover) => (
         <div className={styles.cover}>
+          {/*Box used to overlay hover border on top of cover image*/}
+          <div className={styles.coverOutline}/>
           <Image 
             src={cover}
             placeholder="blur"
