@@ -1,22 +1,18 @@
-from std/macros import unpackVarArgs
 from std/sequtils import anyIt, allIt, mapIt, foldl
-from std/sugar import collect
-from std/strformat import `&`
+from std/sugar import collect, dump
 
 
 import pixie
-import pixie/fileformats/[png]
 import vmath
 
 
 
 type
   Collage* {.inheritable.} = object
-  StrictCollage* {.final.} = object of Collage
-  TransformativeCollage* = object of Collage
-  CropCollage* = object of TransformativeCollage
-  ScaledCollage* = object of TransformativeCollage
-  CropAndScaleCollage* = object of TransformativeCollage
+  RectCollage* = object of Collage
+  CropCollage* = object of RectCollage
+  ScaledCollage* = object of RectCollage
+  CropAndScaleCollage* = object of RectCollage
 
   CollageError* = object of ValueError
 
@@ -24,12 +20,13 @@ type
 
 
 method fillCanvas*(collage: Collage; imageGrid: openArray[seq[Image]]): Image {.base.} =
-  raise newException(CollageError, "Don't use base collage class")
+  raise newException(CollageError, "Don't use an abstract base Collage class")
 
-method fillCanvas*(collage: StrictCollage; imageGrid: openArray[seq[Image]]): Image =
+method fillCanvas*(collage: RectCollage; imageGrid: openArray[seq[Image]]): Image =
 
-  if not allIt(imageGrid, it.len == imageGrid.len):
-    raise newException(CollageError, "Input must be a square matrix of images")
+  let rowLength = imageGrid[0].len
+  if not allIt(imageGrid[1..^1], it.len == rowLength):
+    raise newException(CollageError, "Input must have consistent number of columns")
 
   let
     pieceWidth = imageGrid[0][0].width
@@ -55,26 +52,29 @@ method fillCanvas*(collage: StrictCollage; imageGrid: openArray[seq[Image]]): Im
 
 
 
+func quickCrop(image: Image; bounds: UVec2): Image =
+  let orgBounds = uvec2(uint32(image.width), uint32(image.height))
+  let pos = (orgBounds - bounds) div 2'u32
+  image.subImage(int(pos[0]), int(pos[1]), int(bounds[0]), int(bounds[1]))
 
-#[
 method fillCanvas*(collage: CropCollage; imageGrid: openArray[seq[Image]]): Image =
 
-  var
-    resultWidth = sum()
-    resultHeight = high(uint)
+  var resultBounds = uvec2(high(uint32), high(uint32))
 
   for row in imageGrid:
-    resultWidth = foldl(row, min(a, b.width), resultWidth)
-    resultHeight = foldl(row, min(a, b.height), resultHeight)
+    resultBounds[0] = foldl(row, min(a, uint32(b.width)), resultBounds[0])
+    resultBounds[1] = foldl(row, min(a, uint32(b.height)), resultBounds[1])
 
-  var resultContext = newContext(resultWidth, resultHeight)
 
-  for row, imageRow in imageGrid.pairs:
-    for col, image in imageRow.pairs:
-      drawImage(resultContext, image, vec2(float32(row * pieceWidth), float32(col * pieceHeight)))
 
-  return resultContext.image
-]#
+  let croppedImageGrid = collect:
+    for row in imageGrid:
+      collect:
+        for image in row:
+          quickCrop(image, resultBounds)
+
+  return procCall fillCanvas(RectCollage(collage), croppedImageGrid)
+
 
 
 
@@ -97,9 +97,12 @@ proc collagify*(collage: Collage; imageGrid: openArray[seq[Image]]): Image =
 
 
 
-proc collagify*(collage: Collage; imageGrid: openArray[seq[string]]): string =
+proc collagify*(collage: Collage; imageGrid: openArray[seq[string]]; fileFormat: FileFormat = PngFormat): string =
   let decodedImageGrid: seq[seq[Image]] = collect:
     for row in imageGrid:
-      mapIt(row, it.decodeImage())
+      collect:
+        for image in row:
+          let decodedImage = image.decodeImage()
+          decodedImage.subImage(decodedImage.opaqueBounds())
 
-  return encodePng(collage.collagify(decodedImageGrid))
+  return encodeImage(collage.collagify(decodedImageGrid), fileFormat)

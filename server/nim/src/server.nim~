@@ -1,5 +1,0 @@
-import server/images
-
-
-when isMainModule:
-  discard strictCollage(@[])
