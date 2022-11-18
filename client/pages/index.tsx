@@ -25,25 +25,19 @@ export default function Home() {
         </p>
 
         <div className={styles.grid}>
-          <Link href="/about">
-            <a className={styles.card}>
-              <h2>About Page &rarr;</h2>
-              <p>Cypress will test if this link is working.</p>
-            </a>
+          <Link href="/about" className={styles.card}>
+            <h2>About Page &rarr;</h2>
+            <p>Cypress will test if this link is working.</p>
           </Link>
 
-          <Link href="/editor">
-            <a className={styles.card}>
-              <h2>Editor &rarr;</h2>
-              <p>WIP editor page that lets you customize a collage</p>
-            </a>
+          <Link href="/editor" className={styles.card}>
+            <h2>Editor &rarr;</h2>
+            <p>WIP editor page that lets you customize a collage</p>
           </Link>
 
-          <Link href="/3d-demo">
-            <a className={styles.card}>
-              <h2>3D Demo &rarr;</h2>
-              <p>A demo page showcasing rendering 3d objects on a website</p>
-            </a>
+          <Link href="/3d-demo" className={styles.card}>
+            <h2>3D Demo &rarr;</h2>
+            <p>A demo page showcasing rendering 3d objects on a website</p>
           </Link>
 
           <a
@@ -85,5 +79,5 @@ export default function Home() {
 }
 
 function page(props) {
-  return
+  return;
 }
