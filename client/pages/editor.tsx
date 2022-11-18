@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useCallback, useRef, useState } from "react";
+import { /*useCallback,*/ useRef, useState } from "react";
 import Image from "next/image";
 import styles from "../styles/editor.module.css";
 import {
@@ -7,8 +7,8 @@ import {
   SliderTrack,
   SliderFilledTrack,
   SliderThumb,
-  SliderMark,
-  useSlider,
+  // SliderMark,
+  // useSlider,
 } from "@chakra-ui/react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
