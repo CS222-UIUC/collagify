@@ -1,5 +1,6 @@
 html,
 body {
+  color: var(--chakra-colors-white);
   background-color: var(--chakra-colors-gray-800);
   padding: 0;
   margin: 0;
