@@ -10,8 +10,25 @@
 
 .controlsContainer{
   height: 100%;
-  width: 15%;
+  width: 25%;
   padding: 2%;
+}
+
+.controls{
+  height: 100%;
+  width: 100%;
+  padding: 5%;
+
+  font-size: large;
+  background-color: var(--chakra-colors-gray-900);
+
+  border-radius: 0.5em;
+  border: 0.1em solid var(--chakra-colors-spotifyGreen);
+  box-shadow: 0 0 2.5em var(--chakra-colors-gray-900);
+
+  display: flex;
+  flex-direction: column;
+  align-items:flex-start;
 }
 
 .collageContainer{
@@ -46,5 +63,5 @@
 }
 
 .coverOutline:hover {
-  border: 0.3em solid var(--chakra-colors-spotifyGreen);
+  border: 0.2em solid var(--chakra-colors-spotifyGreen);
 }

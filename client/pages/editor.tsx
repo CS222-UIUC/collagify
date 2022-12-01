@@ -9,9 +9,12 @@ import {
   SliderThumb,
   SliderMark,
   useSlider,
+  Textarea,
 } from "@chakra-ui/react";
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { Collage } from "./collage";
+import { assign } from "cypress/types/lodash";
 
 export default function EditorPage(props) {
   return (
@@ -25,79 +28,79 @@ export default function EditorPage(props) {
   );
 }
 
-export function Editor({covers} : {covers : string[]}) {
-  
-  // TODO: return error page if covers is empty
-  const kMaxCovers = 100;
-  covers = covers.slice(0, kMaxCovers);
-
-  let possible_rows = findPossibleRows(covers.length);
-  // Make the collage approximately square initially
-  let default_index = Math.floor(possible_rows.length / 2);
-  let default_rows = possible_rows[default_index];
-  let default_cols = findColFromRow(covers.length, default_rows);
-
-  let [numRows, setNumRows] = useState(default_rows);
-  let [numCols, setNumCols] = useState(default_cols);
-
-  // Covers can be arranged into n rows if covers % n 
-  const changeCollageDimensions = (index) => {
-    setNumRows(possible_rows[index]);
-    setNumCols(findColFromRow(covers.length, possible_rows[index]))
-  }
-  
+function Editor({covers} : {covers : string[]}) {
+  let [collage, setCollage] = useState(new Collage(covers));
   // Collage and controls are given fixed width and height relative to the viewport
   // The collage will try to fill its assigned space with square covers without overflowing it
   return (
     <main className={styles.editor}>
       <div className={styles.controlsContainer}>
-        <Slider 
-          onChange={changeCollageDimensions} 
-          aria-label="aspect" 
-          defaultValue={default_index} 
-          min={1} 
-          max={possible_rows.length - 1} 
-        >
-          <SliderTrack>
-            <SliderFilledTrack />
-          </SliderTrack>
-          <SliderThumb />
-        </Slider>
+        <CollageControls collage={collage} setCollage={setCollage}/>
       </div>
-
       <div className={styles.collageContainer}>
-        <Collage covers={covers} rows={numRows} cols={numCols}/>
+        <CollageView collage={collage} setCollage={setCollage}/>
       </div>
-
     </main>
   );
 }
 
-function findColFromRow(num_covers: number, num_rows: number) : number {
-  return Math.ceil(num_covers / num_rows);
-}
+// COLLAGE CONTROLs
 
-function findPossibleRows(num_covers: number) : number[] {
-  let to_return : number[] = [];
-  for (let num_rows = 1; num_rows <= num_covers; num_rows++) {
-    let num_cols = findColFromRow(num_covers, num_rows);
-    // There must not be empty rows
-    if (num_covers > num_cols * (num_rows - 1)) {
-      to_return.push(num_rows);
-    }
+function CollageControls({collage, setCollage} : {collage: Collage, setCollage: Function}) {
+
+  function setDims(position : number) {
+    setCollage({...collage.setDims(position)});
   }
-  return to_return;
+
+  function setGap(position : number) {
+    setCollage({...collage.setGap(position)});
+  }
+
+  return (
+    <div className={styles.controls}>
+
+      <p>
+        Aspect Ratio
+      </p>
+      <Slider 
+          onChange={setDims} 
+          aria-label="dims" 
+          defaultValue={collage.dim_index} 
+          min={1} 
+          max={collage.valid_dims.length - 1}
+      >
+        <SliderTrack>
+          <SliderFilledTrack />
+        </SliderTrack>
+        <SliderThumb />
+      </Slider>
+
+      <p>
+        Gap Between Covers
+      </p>
+      <Slider 
+          onChange={setGap} 
+          aria-label="gap" 
+          defaultValue={0} 
+          min={0} 
+          max={10}
+      >
+        <SliderTrack>
+          <SliderFilledTrack />
+        </SliderTrack>
+        <SliderThumb />
+      </Slider>
+
+    </div>
+  );
 }
 
-export function Collage({covers, rows, cols}) {
+// COLLAGE VIEW
 
-  let [displayCovers, setDisplayCovers] = useState(covers);
-  const moveCover = (index_a, index_b) => {
-    let tmp = displayCovers[index_a];
-    displayCovers[index_a] = displayCovers[index_b];
-    displayCovers[index_b] = tmp;
-    // this trick makes react thinks we are changing displayCovers into a new object and rerender
-    setDisplayCovers([...displayCovers]); 
+function CollageView({collage, setCollage} : {collage: Collage, setCollage: Function}) {
+
+  const swapCover = (first, second) => {
+    setCollage({...collage.swapCover(first, second)});
   };
 
   return (
@@ -105,35 +108,45 @@ export function Collage({covers, rows, cols}) {
       <div 
         className={styles.collage}
         style={{
-          aspectRatio: cols / rows,
-          gridTemplateColumns: `repeat(${cols}, 1fr)`,
-          gridTemplateRows: `repeat(${rows}, 1fr)`,
+          aspectRatio: collage.cols / collage.rows,
+          gridTemplateColumns: `repeat(${collage.cols}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${collage.rows}, minmax(0, 1fr))`,
         }}
       >
-        {displayCovers.map((url, index) => (<Cover index={index} url={url} moveCover={moveCover}/>))}
+        {collage.covers.map((url, index) => (
+          <Cover
+            key={url} 
+            index={index} 
+            url={url} 
+            swapCover={swapCover}
+            gap={collage.gap}
+          />
+        ))}
       </div>
     </DndProvider>
   );
 }
 
-export function Cover({index, url, moveCover}) {
-  // useDrag - the list item is draggable
+function Cover({index, url, swapCover, gap}) {
+  // a cover is draggable
   const [, dragRef] = useDrag({
     type: 'cover',
     item: { index },
   })
-  // useDrop - the list item is also a drop area
+  // a cover is also a drag receptacle
   const [, dropRef] = useDrop({
       accept: 'cover',
-      drop: (item : {index: number}) => {
-        console.log("dropping");
-        moveCover(item.index, index);
+      drop: (other : {index: number}) => {
+        swapCover(other.index, index);
       }
   })
-  const ref = useRef(null)
-  const dragDropRef = dragRef(dropRef(ref))
+  // black magic to combine drag & drop ref
   return (
-    <div className={styles.cover} ref={dragDropRef}>
+    <div 
+      className={styles.cover} 
+      ref={(node) => {dragRef(dropRef(node))}}
+      style={{margin: `${gap}%`}}
+    >
       {/*Box used to overlay hover border on top of cover image*/}
       <div className={styles.coverOutline}/>
       <Image 
@@ -141,12 +154,14 @@ export function Cover({index, url, moveCover}) {
         placeholder="blur"
         blurDataURL="/missing-cover.jpg"
         alt="An album cover"
-        sizes="10em"
+        sizes="5em"
         fill
       />
     </div>
   )
 }
+
+// DATA FETCHING FUNCTIONS
 
 export async function getServerSideProps(context) {
   const covers = [
