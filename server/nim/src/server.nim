@@ -20,14 +20,18 @@ proc onProgressChanged(total, progress, speed: BiggestInt) {.async.} =
 proc main* {.async.} =
   var
     server: AsyncHttpServer = newAsyncHttpServer()
+    # we need a http client to GET the Spotify images
     client: AsyncHttpClient = newAsyncHttpClient()
 
   client.onProgressChanged = onProgressChanged
 
   proc generateCollage(req: Request) {.async.} =
+    ## Handles GET requests
 
+    # prints request details to stderr
     stderr.write(&"{dumpToString(req)}\L")
 
+    # matrix of urls, based on the dimensions passed in the query string
     var matrix: seq[seq[Uri]]
     for row in req.url.query.split('&'):
       matrix.add(newSeq[Uri]())
@@ -46,7 +50,8 @@ proc main* {.async.} =
 
         matrix[^1].add(uri)
 
-    dump matrix
+    # # prints contents of matrix url, I need to make sure they're decoded properly
+    # dump matrix
 
     var
       futureResponses: seq[seq[Future[AsyncResponse]]]
@@ -57,10 +62,14 @@ proc main* {.async.} =
       for j, url in row.pairs:
         futureResponses[i][j] = client.get(url)
 
+    # at this point, futureResponses has a bunch of promises to get the contents of each image
     for i, row in futureResponses.pairs:
       for j, response in row.pairs:
         discard await response
 
+    # now, futureResponses has fully gotten each image
+
+    # error checking for each image download response
     for i, row in futureResponses.pairs:
       for j, response in row.pairs:
         if response.failed():
@@ -70,6 +79,7 @@ proc main* {.async.} =
           await req.respond(Http502, &"\"{matrix[i][j]}\": {response.read().status}")
           return
 
+    # bodies is the actual image data extracted from each repsonse
     var bodies: seq[seq[string]]
 
     newSeq(bodies, matrix.len)
@@ -81,6 +91,7 @@ proc main* {.async.} =
 
     var collageImage: string
     try:
+      # allows crop collage instead of a strict rectangle collage
       if req.url.path == "/crop":
         collageImage = collagify(CropCollage(), bodies)
       else:
@@ -92,6 +103,7 @@ proc main* {.async.} =
 
     let headers = newHttpHeaders({"Content-Type" : "image/png"})
 
+    # collage was successfully generated
     await req.respond(Http200, collageImage, headers)
 
 
@@ -104,8 +116,10 @@ proc main* {.async.} =
       of HttpGet:
         await generateCollage(req)
       else:
+        # whatever method passed is not allowed/supported
         await req.respond(Http400, "400 Bad Request", newHttpHeaders(titleCase=true))
 
+  # port is 8080
   server.listen(Port(8080))
   while true:
     if server.shouldAcceptRequest():
@@ -118,4 +132,5 @@ proc main* {.async.} =
 
 
 when isMainModule:
+  # main handles asynchronous events forver 
   waitFor main()
