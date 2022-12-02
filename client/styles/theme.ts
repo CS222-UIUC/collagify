@@ -1,35 +1,39 @@
-import { extendTheme /*, theme as baseTheme*/ } from "@chakra-ui/react";
+import { extendTheme } from "@chakra-ui/react";
+import { mode } from "@chakra-ui/theme-tools";
+
+const styles = {
+  global: (props) => ({
+    body: {
+      color: mode("spotifyBlack", "white")(props),
+      bg: mode("white", "spotifyBlack")(props),
+    },
+  }),
+};
 
 export default extendTheme({
-  initialColorMode: "dark",
-  useSystemColorMode: false,
+  config: {
+    // BUG: Doesn't work
+    initialColorMode: "dark",
+    useSystemColorMode: false,
+  },
   colors: {
     spotifyDarkGreen: "#1DB954", // For non-hover links
     spotifyLightGreen: "#1ED760", // For on-hover links
+    spotifyGrey: "#FFFFFF12",
     spotifyBlack: "#191414",
   },
   fonts: {
-    heading: `Gotham, sans-serif`,
-    body: `Gotham, sans-serif`,
-    mono: `Gotham, sans-serif`,
+    heading: `Circular, sans-serif`,
+    body: `Circular, sans-serif`,
+    mono: `Circular, sans-serif`,
   },
-  styles: {
-    // makes chakra not override global.css' background color
-    global: {
-      body: {
-        bg: "",
-      },
-    },
-  },
-  // Less boilerplate way?
-  components: {
-    Button: {
-      baseStyle: {
-        _hover: {
-          color: "spotifyBlack",
-          backgroundColor: "spotifyLightGreen",
-        },
-      },
-    },
-  },
+  styles,
+  // styles: {
+  //   // makes chakra not override global.css' background color
+  //   global: {
+  //     body: {
+  //       bg: "",
+  //     },
+  //   },
+  // },
 });

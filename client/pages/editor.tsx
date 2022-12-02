@@ -1,4 +1,3 @@
-import Head from "next/head";
 import { /*useCallback,*/ useRef, useState } from "react";
 import Image from "next/image";
 import styles from "../styles/editor.module.css";
@@ -7,21 +6,20 @@ import {
   SliderTrack,
   SliderFilledTrack,
   SliderThumb,
+  Box,
+  Flex,
   // SliderMark,
   // useSlider,
 } from "@chakra-ui/react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import PageWrapper from "../components/PageWrapper";
 
 export default function EditorPage(props) {
   return (
-    <>
-      <Head>
-        <title>Customize your Collage</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <PageWrapper subtitle="Editor">
       <Editor {...props} />
-    </>
+    </PageWrapper>
   );
 }
 
@@ -48,8 +46,8 @@ export function Editor({ covers }: { covers: string[] }) {
   // Collage and controls are given fixed width and height relative to the viewport
   // The collage will try to fill its assigned space with square covers without overflowing it
   return (
-    <main className={styles.editor}>
-      <div className={styles.controlsContainer}>
+    <Flex className={styles.editor}>
+      <Box className={styles.controlsContainer}>
         <Slider
           onChange={changeCollageDimensions}
           aria-label="aspect"
@@ -62,12 +60,12 @@ export function Editor({ covers }: { covers: string[] }) {
           </SliderTrack>
           <SliderThumb />
         </Slider>
-      </div>
+      </Box>
 
-      <div className={styles.collageContainer}>
+      <Box className={styles.collageContainer}>
         <Collage covers={covers} rows={numRows} cols={numCols} />
-      </div>
-    </main>
+      </Box>
+    </Flex>
   );
 }
 
