@@ -1,32 +1,37 @@
 import std/asynchttpserver
 import std/asyncdispatch
-import std/json
 import std/httpclient
-import std/sequtils
+import std/sugar
 import std/uri
 from std/strformat import `&`
 from std/strutils import split
-from std/sugar import collect
 
 import server/images
+
+from pixie import Image, PixieError
 
 
 proc onProgressChanged(total, progress, speed: BiggestInt) {.async.} =
   echo(&"Downloaded {progress} of {total}")
   echo(&"Current rate: {float(speed):.3g} b/s")
 
-  discard 
 
 
 proc main* {.async.} =
   var
     server: AsyncHttpServer = newAsyncHttpServer()
+    # we need a http client to GET the Spotify images
     client: AsyncHttpClient = newAsyncHttpClient()
 
   client.onProgressChanged = onProgressChanged
 
   proc generateCollage(req: Request) {.async.} =
+    ## Handles GET requests
 
+    # prints request details to stderr
+    stderr.write(&"{dumpToString(req)}\L")
+
+    # matrix of urls, based on the dimensions passed in the query string
     var matrix: seq[seq[Uri]]
     for row in req.url.query.split('&'):
       matrix.add(newSeq[Uri]())
@@ -45,28 +50,63 @@ proc main* {.async.} =
 
         matrix[^1].add(uri)
 
-    if matrix.len == 0:
-      await req.respond(Http400, &"Must have at least 1 row{httpNewLine}")
-      return
+    # # prints contents of matrix url, I need to make sure they're decoded properly
+    # dump matrix
 
-    if matrix.anyIt(it.len == 0):
-      await req.respond(Http400, &"Cannot have empty rows{httpNewLine}")
-      return
+    var
+      futureResponses: seq[seq[Future[AsyncResponse]]]
 
-    if matrix.len == 1 and matrix[0].len == 1:
-      await req.respond(Http400, &"Must have at least 1 image{httpNewLine}")
-      return
-
-    echo pretty(%* matrix)
-
-    var contents: seq[seq[string]]
-    newSeq(contents, matrix.len)
+    newSeq(futureResponses, matrix.len)
     for i, row in matrix.pairs:
-      newSeq(contents[i], row.len)
+      newSeq(futureResponses[i], row.len)
+      for j, url in row.pairs:
+        futureResponses[i][j] = client.get(url)
+
+    # at this point, futureResponses has a bunch of promises to get the contents of each image
+    for i, row in futureResponses.pairs:
+      for j, response in row.pairs:
+        discard await response
+
+    # now, futureResponses has fully gotten each image
+
+    # error checking for each image download response
+    for i, row in futureResponses.pairs:
+      for j, response in row.pairs:
+        if response.failed():
+          await req.respond(Http502, &"\"{matrix[i][j]}\": {response.readError().msg}")
+          return
+        if not response.read().code().is2xx():
+          await req.respond(Http502, &"\"{matrix[i][j]}\": {response.read().status}")
+          return
+
+    # bodies is the actual image data extracted from each repsonse
+    var bodies: seq[seq[string]]
+
+    newSeq(bodies, matrix.len)
+    for i, row in futureResponses.pairs:
+      newSeq(bodies[i], row.len)
+      for j, response in row.pairs:
+        bodies[i][j] = await response.read().body()
 
 
+    var collageImage: string
+    try:
+      # allows crop collage instead of a strict rectangle collage
+      if req.url.path == "/crop":
+        collageImage = collagify(CropCollage(), bodies)
+      else:
+        collageImage = collagify(RectCollage(), bodies)
+    except CollageError:
+      await req.respond(Http400, &"{getCurrentExceptionMsg()}\L")
+    except PixieError:
+      await req.respond(Http400, &"{getCurrentExceptionMsg()}\L")
 
-    await req.respond(Http200, "Bruh")
+    let headers = newHttpHeaders({"Content-Type" : "image/png"})
+
+    # collage was successfully generated
+    await req.respond(Http200, collageImage, headers)
+
+
   proc callback(req: Request) {.async.} =
 
     case req.reqMethod:
@@ -76,8 +116,10 @@ proc main* {.async.} =
       of HttpGet:
         await generateCollage(req)
       else:
+        # whatever method passed is not allowed/supported
         await req.respond(Http400, "400 Bad Request", newHttpHeaders(titleCase=true))
 
+  # port is 8080
   server.listen(Port(8080))
   while true:
     if server.shouldAcceptRequest():
@@ -90,4 +132,5 @@ proc main* {.async.} =
 
 
 when isMainModule:
+  # main handles asynchronous events forver 
   waitFor main()
