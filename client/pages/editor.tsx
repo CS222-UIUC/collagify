@@ -1,5 +1,5 @@
 import Head from "next/head";
-import {useCallback, useRef, useState,} from 'react'
+import {useState,} from 'react'
 import Image from "next/image";
 import styles from "../styles/editor.module.css";
 import {
@@ -7,32 +7,29 @@ import {
   SliderTrack,
   SliderFilledTrack,
   SliderThumb,
-  SliderMark,
-  useSlider,
-  Textarea,
 } from "@chakra-ui/react";
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { Collage } from "./collage";
-import { assign } from "cypress/types/lodash";
+import { Collage } from "../public/collage";
 
-export default function EditorPage(props) {
-  return (
-    <>
-    <Head>
-      <title>Customize your Collage</title>
-      <link rel="icon" href="/favicon.ico" />
-    </Head>
-    <Editor {...props}/>
-    </>
-  );
-}
+// export default function EditorPage(props) {
+//   return (
+//     <>
+//     <Head>
+//       <title>Customize your Collage</title>
+//       <link rel="icon" href="/favicon.ico" />
+//     </Head>
+//     <Editor {...props}/>
+//     </>
+//   );
+// }
 
-function Editor({covers} : {covers : string[]}) {
+export default function Editor({covers} : {covers : string[]}) {
   let [collage, setCollage] = useState(new Collage(covers));
   // Collage and controls are given fixed width and height relative to the viewport
   // The collage will try to fill its assigned space with square covers without overflowing it
   return (
+    
     <main className={styles.editor}>
       <div className={styles.controlsContainer}>
         <CollageControls collage={collage} setCollage={setCollage}/>
@@ -62,7 +59,7 @@ function CollageControls({collage, setCollage} : {collage: Collage, setCollage: 
       <p>
         Aspect Ratio
       </p>
-      <Slider 
+      {/* <Slider 
           onChange={setDims} 
           aria-label="dims" 
           defaultValue={collage.dim_index} 
@@ -73,12 +70,12 @@ function CollageControls({collage, setCollage} : {collage: Collage, setCollage: 
           <SliderFilledTrack />
         </SliderTrack>
         <SliderThumb />
-      </Slider>
+      </Slider> */}
 
       <p>
         Gap Between Covers
       </p>
-      <Slider 
+      {/* <Slider 
           onChange={setGap} 
           aria-label="gap" 
           defaultValue={0} 
@@ -89,7 +86,7 @@ function CollageControls({collage, setCollage} : {collage: Collage, setCollage: 
           <SliderFilledTrack />
         </SliderTrack>
         <SliderThumb />
-      </Slider>
+      </Slider> */}
 
     </div>
   );
