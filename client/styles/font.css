@@ -1,0 +1,50 @@
+/* TODO: Standardize font weights and styles */
+
+@font-face {
+  font-family: "Circular";
+  src: url("/client/styles/Circular-Spotify-Font/CircularSpotifyText-Book.otf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Circular";
+  src: url("/client/styles/Circular-Spotify-Font//CircularSpotifyText-Bold.otf");
+  font-weight: bolder;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Circular";
+  src: url("/client/styles/Circular-Spotify-Font//CircularSpotifyText-Black.otf");
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Circular";
+  src: url("/client/styles/Circular-Spotify-Font//CircularSpotifyText-BlackItalic.otf");
+  font-weight: 800;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Circular";
+  src: url("/client/styles/Circular-Spotify-Font//CircularSpotifyText-Light.otf");
+  font-weight: lighter;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Circular";
+  src: url("/client/styles/Circular-Spotify-Font//CircularSpotifyText-BookItalic.otf");
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Gotham";
+  src: url("/client/styles/Circular-Spotify-Font//CircularSpotifyText-ThinItalic.otf");
+  font-weight: lighter;
+  font-style: italic;
+}
