@@ -1,4 +1,5 @@
-import { /*useCallback,*/ useRef, useState } from "react";
+import Head from "next/head";
+import {useRef, useState,} from 'react'
 import Image from "next/image";
 import styles from "../styles/editor.module.css";
 import {
@@ -8,12 +9,17 @@ import {
   SliderThumb,
   Box,
   Flex,
-  // SliderMark,
-  // useSlider,
+  Spacer,
+  VStack,
+  AspectRatio,
+  Wrap,
 } from "@chakra-ui/react";
+import theme from "../styles/theme";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+
 import PageWrapper from "../components/PageWrapper";
+import { Collage } from "../public/collage";
 
 export default function EditorPage(props) {
   return (
@@ -24,126 +30,162 @@ export default function EditorPage(props) {
 }
 
 export function Editor({ covers }: { covers: string[] }) {
-  // TODO: return error page if covers is empty
-  const kMaxCovers = 100;
-  covers = covers.slice(0, kMaxCovers);
-
-  let possible_rows = findPossibleRows(covers.length);
-  // Make the collage approximately square initially
-  let default_index = Math.floor(possible_rows.length / 2);
-  let default_rows = possible_rows[default_index];
-  let default_cols = findColFromRow(covers.length, default_rows);
-
-  let [numRows, setNumRows] = useState(default_rows);
-  let [numCols, setNumCols] = useState(default_cols);
-
-  // Covers can be arranged into n rows if covers % n
-  const changeCollageDimensions = (index) => {
-    setNumRows(possible_rows[index]);
-    setNumCols(findColFromRow(covers.length, possible_rows[index]));
-  };
-
   // Collage and controls are given fixed width and height relative to the viewport
   // The collage will try to fill its assigned space with square covers without overflowing it
+  // TODO: use flex instead of grid to implement collage to avoid all the flex box jank
+  let [collage, setCollage] = useState(new Collage(covers));
   return (
-    <Flex className={styles.editor}>
-      <Box className={styles.controlsContainer}>
-        <Slider
-          onChange={changeCollageDimensions}
-          aria-label="aspect"
-          defaultValue={default_index}
-          min={1}
-          max={possible_rows.length - 1}
-        >
-          <SliderTrack>
-            <SliderFilledTrack />
-          </SliderTrack>
-          <SliderThumb />
-        </Slider>
+    <Flex dir="row" align="center" justify="space-between" w="100%" h="100vh">
+      <Box w="25%" h="100%" padding="2%">
+        <CollageControls collage={collage} setCollage={setCollage}/>
       </Box>
-
-      <Box className={styles.collageContainer}>
-        <Collage covers={covers} rows={numRows} cols={numCols} />
-      </Box>
+      {/* Converts this to box breaks centering of collage */}
+      <div className={styles.collageContainer}>
+        <CollageView collage={collage} setCollage={setCollage}/>
+      </div>
     </Flex>
   );
 }
 
-function findColFromRow(num_covers: number, num_rows: number): number {
-  return Math.ceil(num_covers / num_rows);
-}
+// COLLAGE CONTROLs
 
-function findPossibleRows(num_covers: number): number[] {
-  let to_return: number[] = [];
-  for (let num_rows = 1; num_rows <= num_covers; num_rows++) {
-    let num_cols = findColFromRow(num_covers, num_rows);
-    // There must not be empty rows
-    if (num_covers > num_cols * (num_rows - 1)) {
-      to_return.push(num_rows);
-    }
+function CollageControls({collage, setCollage} : {collage: Collage, setCollage: Function}) {
+
+  function setDims(position : number) {
+    setCollage({...collage.setDims(position)});
   }
-  return to_return;
+
+  function setGap(position : number) {
+    setCollage({...collage.setGap(position)});
+  }
+
+  return (
+    <VStack 
+      spacing="1em"
+      align="start"
+
+      w="100%" h="100%"
+      border="0.1em solid"
+      borderRadius="0.2em"
+      borderColor={theme.colors.spotifyDarkGreen}
+      boxShadow="0 0 0.7em var(--chakra-colors-spotifyDarkGreen)"
+
+      padding="5%"
+      bgColor={theme.colors.spotifyGrey}
+      fontSize="large"
+    >
+
+      <p>
+        Aspect Ratio
+      </p>
+      <Slider 
+          onChange={setDims} 
+          aria-label="dims" 
+          defaultValue={collage.dim_index} 
+          min={0} 
+          max={collage.valid_dims.length - 1}
+      >
+        <SliderTrack>
+          <SliderFilledTrack />
+        </SliderTrack>
+        <SliderThumb />
+      </Slider>
+
+      <p>
+        Gap Between Covers
+      </p>
+      <Slider 
+          onChange={setGap} 
+          aria-label="gap" 
+          defaultValue={0} 
+          min={0} 
+          max={10}
+      >
+        <SliderTrack>
+          <SliderFilledTrack />
+        </SliderTrack>
+        <SliderThumb />
+      </Slider>
+
+    </VStack>
+  );
 }
 
-export function Collage({ covers, rows, cols }) {
-  let [displayCovers, setDisplayCovers] = useState(covers);
-  const moveCover = (index_a, index_b) => {
-    let tmp = displayCovers[index_a];
-    displayCovers[index_a] = displayCovers[index_b];
-    displayCovers[index_b] = tmp;
-    // this trick makes react thinks we are changing displayCovers into a new object and rerender
-    setDisplayCovers([...displayCovers]);
+// COLLAGE VIEW
+
+function CollageView({collage, setCollage} : {collage: Collage, setCollage: Function}) {
+
+  const swapCover = (first, second) => {
+    setCollage({...collage.swapCover(first, second)});
   };
 
   return (
     <DndProvider backend={HTML5Backend}>
+      {/* Collage cannot be converted into chakra <Grid> without breaking scaling */}
+      {/* I wasted 2 hours trying to do that */}
       <div
         className={styles.collage}
         style={{
-          aspectRatio: cols / rows,
-          gridTemplateColumns: `repeat(${cols}, 1fr)`,
-          gridTemplateRows: `repeat(${rows}, 1fr)`,
+          aspectRatio: collage.cols / collage.rows,
+          gridTemplateColumns: `repeat(${collage.cols}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${collage.rows}, minmax(0, 1fr))`,
         }}
       >
-        {displayCovers.map((url, index) => (
-          <Cover index={index} url={url} moveCover={moveCover} />
+        {collage.covers.map((url, index) => (
+          <Cover
+            key={url} 
+            index={index} 
+            url={url} 
+            swapCover={swapCover}
+            gap={collage.gap}
+          />
         ))}
       </div>
     </DndProvider>
   );
 }
 
-export function Cover({ index, url, moveCover }) {
-  // useDrag - the list item is draggable
+function Cover({index, url, swapCover, gap}) {
+  // a cover is draggable
   const [, dragRef] = useDrag({
     type: "cover",
     item: { index },
-  });
-  // useDrop - the list item is also a drop area
+  })
+  // a cover is also a drag receptacle
   const [, dropRef] = useDrop({
-    accept: "cover",
-    drop: (item: { index: number }) => {
-      console.log("dropping");
-      moveCover(item.index, index);
-    },
-  });
-  const ref = useRef(null);
-  const dragDropRef = dragRef(dropRef(ref));
+      accept: 'cover',
+      drop: (other : {index: number}) => {
+        swapCover(other.index, index);
+      }
+  })
   return (
-    <div className={styles.cover} ref={dragDropRef}>
-      {/*Box used to overlay hover border on top of cover image*/}
-      <div className={styles.coverOutline} />
-      <Image
-        src={url}
-        placeholder="blur"
-        blurDataURL="/missing-cover.jpg"
-        alt="An album cover"
-        sizes="10em"
-        fill
-      />
-    </div>
+    <AspectRatio 
+      ratio={1}
+      pos="relative"
+      margin={gap}
+      ref={(node) => {dragRef(dropRef(node))}}  // black magic to combine drag & drop ref
+    >
+      <Box>
+        <Box 
+          w="100%" h="100%" 
+          pos="absolute"
+          zIndex={1}
+          _hover={{ border:"0.2em solid var(--chakra-colors-spotifyLightGreen)" }}
+        />
+        <Image
+          src={url}
+          placeholder="blur"
+          blurDataURL="/missing-cover.jpg"
+          alt="An album cover"
+          sizes="5em"
+          fill
+        />
+      </Box>
+    </AspectRatio>
   );
 }
+
+// DATA FETCHING FUNCTIONS
 
 export async function getServerSideProps(context) {
   const covers = [
