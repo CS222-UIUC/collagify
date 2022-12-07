@@ -11,19 +11,13 @@ import server/images
 from pixie import Image, PixieError
 
 
-proc onProgressChanged(total, progress, speed: BiggestInt) {.async.} =
-  echo(&"Downloaded {progress} of {total}")
-  echo(&"Current rate: {float(speed):.3g} b/s")
 
 
 
 proc main* {.async.} =
   var
     server: AsyncHttpServer = newAsyncHttpServer()
-    # we need a http client to GET the Spotify images
-    client: AsyncHttpClient = newAsyncHttpClient()
 
-  client.onProgressChanged = onProgressChanged
 
   proc generateCollage(req: Request) {.async.} =
     ## Handles GET requests
@@ -60,6 +54,8 @@ proc main* {.async.} =
     for i, row in matrix.pairs:
       newSeq(futureResponses[i], row.len)
       for j, url in row.pairs:
+        # we need a http client to GET the Spotify images
+        var client: AsyncHttpClient = newAsyncHttpClient()
         futureResponses[i][j] = client.get(url)
 
     # at this point, futureResponses has a bunch of promises to get the contents of each image
