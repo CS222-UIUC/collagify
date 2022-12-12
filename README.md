@@ -1,5 +1,15 @@
 # Collagify
 
+A web application that allows a user customize a collage of album covers. Improves on existing applications of similar goals:
+ - More collage editing features
+ - Image generation on the server rather than client
+ - Improved UI/UX
+
+## Architecture
+![CS222 Project Proposal (1)](https://user-images.githubusercontent.com/90884224/207167598-9e88f283-83bf-4eec-ae14-bd1fc468546b.png)
+
+# Development Instructions
+
 Ensure Node.js is installed with TypeScript support and Nim is installed with `nimble`. Run `npm install` in both `~/client` and `~/server` to install dependencies for the front-end and API authentication.
 
 # Client
