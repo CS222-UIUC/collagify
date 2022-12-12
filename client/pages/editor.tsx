@@ -1,4 +1,4 @@
-import { /*useCallback,*/ useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import styles from "../styles/editor.module.css";
 import {
@@ -8,8 +8,6 @@ import {
   SliderThumb,
   Box,
   Flex,
-  // SliderMark,
-  // useSlider,
 } from "@chakra-ui/react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -158,7 +156,6 @@ export async function getServerSideProps(context) {
     "https://i.scdn.co/image/ab67616d00001e02f4862b4fa494ef26fd8f199e",
   ];
   // TODO: Add code that fetches covers from spotify API here
-  // Ideally the covers should be of the same size
   return {
     props: {
       covers,

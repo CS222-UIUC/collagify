@@ -1,15 +1,6 @@
 import { extendTheme } from "@chakra-ui/react";
 import { mode } from "@chakra-ui/theme-tools";
 
-const styles = {
-  global: (props) => ({
-    body: {
-      color: mode("spotifyBlack", "white")(props),
-      bg: mode("white", "spotifyBlack")(props),
-    },
-  }),
-};
-
 export default extendTheme({
   config: {
     // BUG: Doesn't work
@@ -27,13 +18,4 @@ export default extendTheme({
     body: `Circular, sans-serif`,
     mono: `Circular, sans-serif`,
   },
-  styles,
-  // styles: {
-  //   // makes chakra not override global.css' background color
-  //   global: {
-  //     body: {
-  //       bg: "",
-  //     },
-  //   },
-  // },
 });

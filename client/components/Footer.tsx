@@ -4,6 +4,8 @@ import {
   Container,
   Flex,
   Link,
+  Spacer,
+  Text,
   useColorMode,
 } from "@chakra-ui/react";
 
@@ -11,7 +13,7 @@ export default function Footer() {
   const { colorMode, toggleColorMode } = useColorMode();
   return (
     <Box h="6em" bg="spotifyGrey">
-      <Container h="full" centerContent justifyContent="center">
+      <Container h="full" centerContent justifyContent="center" p="1em">
         <Flex
           columnGap="1em"
           direction={{ base: "column", sm: "row" }}
@@ -40,6 +42,8 @@ export default function Footer() {
             Toggle {colorMode === "light" ? "Dark" : "Light"}
           </Button>
         </Flex>
+        <Spacer />
+        <Text>Copyright © 2022. All rights reserved. (Maybe)</Text>
       </Container>
     </Box>
   );
