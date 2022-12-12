@@ -3,7 +3,7 @@
 Ensure Node.js is installed with TypeScript support and Nim is installed with `nimble`. Run `npm install` in both `~/client` and `~/server` to install dependencies for the front-end and API authentication.
 
 # Client
-### (`~/client)`)
+### (`~/client`)
 
 Run `npm start dev` for a development server running locally on your machine. To build and run a production application, run `npm start`.
 
