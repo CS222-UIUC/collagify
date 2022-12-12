@@ -2,11 +2,13 @@
 
 Ensure Node.js is installed with TypeScript support and Nim is installed with `nimble`. Run `npm install` in both `~/client` and `~/server` to install dependencies for the front-end and API authentication.
 
-# Client (`~/client)`)
+# Client
+### (`~/client)`)
 
 Run `npm start dev` for a development server running locally on your machine. To build and run a production application, run `npm start`.
 
-# Running the image generation server (`~/server`)
+# Running the image generation server
+### (`~/server`)
 
 This application was tested using Nim 1.6
 
@@ -40,7 +42,8 @@ a strict rectangle collage, so each image's dimensions must be exactly the same.
 A crop collage would crop images by using the smallest image's dimensions as a reference
 and cropping all images to match those particular dimensions.
 
-# Running the Spotify authentication examples (`~/api`)
+# Running the Spotify authentication examples
+### (`~/api`)
 
 (Excerpts from Spotify's official README)
 
